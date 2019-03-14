@@ -1,0 +1,26 @@
+{
+  "name": "babel-plugin-import-glob-array",
+  "version": "0.0.0",
+  "description": "Transform a directory import to individual imports represented as an array",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "update-snapshots": "jest -u"
+  },
+  "author": "Jeff Escalante",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "jest": "^24.5.0"
+  },
+  "jest": {
+    "verbose": true,
+    "testPathIgnorePatterns": [
+      "__tests__/fixtures"
+    ]
+  },
+  "dependencies": {
+    "glob": "^7.1.3",
+    "is-glob": "^4.0.0"
+  }
+}

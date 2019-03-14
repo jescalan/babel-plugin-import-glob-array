@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`works 1`] = `
+"import md from 'marked';
+import { dir as _iga } from './docs/bar.md';
+import { dir as _iga2 } from './docs/foo.js';
+const foo = ['_iga', '_iga2'];
+import _iga3, { _importMeta as _iga4 } from './docs/bar.md';
+import _iga5, { _importMeta as _iga6 } from './docs/foo.js';
+const wow = ['_iga3', '_iga5'];
+const meta = ['_iga4', '_iga6'];"
+`;
