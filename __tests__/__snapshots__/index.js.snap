@@ -4,11 +4,11 @@ exports[`works 1`] = `
 "import md from 'marked';
 import { dir as _iga } from './docs/bar.md';
 import { dir as _iga2 } from './docs/foo.js';
-const foo = ['_iga', '_iga2'];
+const foo = [_iga, _iga2];
 import _iga3, { foo as _iga4 } from './docs/bar.md';
 import _iga5, { foo as _iga6 } from './docs/foo.js';
-const wow = ['_iga3', '_iga5'];
-const bar = ['_iga4', '_iga6'];
+const wow = [_iga3, _iga5];
+const bar = [_iga4, _iga6];
 const meta = [{
   absolutePath: '/Users/jeff/Desktop/babel-plugin-import-glob-array/__tests__/fixtures/docs/bar.md',
   importedPath: './docs/bar.md'

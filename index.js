@@ -98,7 +98,7 @@ module.exports = function importGlobArrayPlugin(babel) {
             // Now we need to associate the local name "x" with the placeholder we're
             // about to replace it with, so that later we can create x = [_iga1, _iga2, ...etc]
             if (!namePlaceholderMap[name]) namePlaceholderMap[name] = []
-            namePlaceholderMap[name].push(t.stringLiteral(placeholder))
+            namePlaceholderMap[name].push(t.identifier(placeholder))
 
             // There are three types of import specifiers we could be dealing with here. Depending on
             // which type, we need to slightly modify the output.
