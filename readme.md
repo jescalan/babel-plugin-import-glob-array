@@ -54,8 +54,6 @@ You can import multiple exports as well and it will turn out as expected. You ca
 
 ### Adding Import Metadata
 
-> **NOTE**: This has not yet been implemented, but it will be soon!
-
 Sometimes it is important to know some information about where the file came from and what it was called in addition to simply the values that were exported. If this is the case, you can import the special property `_importMeta` to get access to this information. For example:
 
 ```js
@@ -70,8 +68,14 @@ import _iga1 from './pages/page2'
 
 let pages = [_iga, _iga1]
 let metadata = [
-  { path: '/Users/example/project/pages/page1.js' },
-  { path: '/Users/example/project/pages/page2.js' }
+  {
+    absolutePath: '/Users/example/project/pages/page1.js',
+    importedPath: './pages/page1'
+  },
+  {
+    absolutePath: '/Users/example/project/pages/page2.js',
+    importedPath: './pages/page1'
+  }
 ]
 ```
 

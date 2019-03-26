@@ -37,13 +37,55 @@ module.exports = function importGlobArrayPlugin(babel) {
         // individual imports. In the process, we assign a placeholder variable name to each import.
         // Later, we will put the placeholders in an array and assign that to the actual name.
         const namePlaceholderMap = {}
+        const importMetaMap = {}
         const importStatements = filesRelative.map(filePath => {
           // Now let's go through the left side of the import statement, known as "specifiers" to babel.
           // In this section we will see one or more import specifiers. For example, we might see
           // something like "import x", which would be a single specifier, or "import x, { y as z }",
           // which would be an array of two specifiers.
-          const specifiers = _path.node.specifiers.map(specifier => {
-            // First we'll set up a placeholder for the import. Later on we will rename it to the
+          const specifiers = _path.node.specifiers.reduce((acc, specifier) => {
+            // First we check whether we have a special _importMeta import, which gets handled
+            // differently. For this special export, we actually want to remove it, then add a
+            // variable below that contains the meta values directly. So for example:
+            //
+            // import pages, {_importMeta as metadata } from './pages/*'
+            //
+            // would turn into:
+            //
+            // import _iga1 from './pages/foo'
+            // import _iga2 from './pages/bar'
+            // const pages = [_iga1, iga2]
+            // const metadata = [{ path: 'pages/foo.js' }, { path: 'pages/bar.js' }]
+            if (
+              specifier.imported &&
+              specifier.imported.name === '_importMeta'
+            ) {
+              // First we create a key for the variable that we're trying to import metadata
+              // into, if there isn't one already
+              const name = specifier.local.name
+              if (!importMetaMap[name]) importMetaMap[name] = []
+
+              // Then we add the file paths to the metadata, formatted as babel expressions
+              // since we plan to add it to the source later.
+              importMetaMap[name].push(
+                t.objectExpression([
+                  t.objectProperty(
+                    t.identifier('absolutePath'),
+                    t.stringLiteral(path.resolve(baseDir, filePath))
+                  ),
+                  t.objectProperty(
+                    t.identifier('importedPath'),
+                    t.stringLiteral(filePath)
+                  )
+                ])
+              )
+
+              // and we return the accumulator without adding to it, since _importMeta is a
+              // synthetic import that we process separately
+              return acc
+            }
+
+            // Next we'll set up a placeholder for the import. Later on we will rename it to the
             // intended name, for now we need to prevent conflicts.
             const placeholder = _path.scope.generateUid('_iga')
 
@@ -56,25 +98,30 @@ module.exports = function importGlobArrayPlugin(babel) {
             // Now we need to associate the local name "x" with the placeholder we're
             // about to replace it with, so that later we can create x = [_iga1, _iga2, ...etc]
             if (!namePlaceholderMap[name]) namePlaceholderMap[name] = []
-            namePlaceholderMap[name].push(placeholder)
+            namePlaceholderMap[name].push(t.stringLiteral(placeholder))
 
             // There are three types of import specifiers we could be dealing with here. Depending on
             // which type, we need to slightly modify the output.
             if (t.isImportDefaultSpecifier(specifier)) {
               // An "import default specifier" could be for example: "import x"
               // This needs to be transformed into "import _iga1"
-              return t.importDefaultSpecifier(t.identifier(placeholder))
+              acc.push(t.importDefaultSpecifier(t.identifier(placeholder)))
+              return acc
             } else if (t.isImportSpecifier(specifier)) {
               // Next, an "import specifier" could be for example: "import { x as y }"
               // This needs to be transformed into "import { x as _iga1 }"
-              return t.importSpecifier(
-                t.identifier(placeholder),
-                t.identifier(specifier.imported.name)
+              acc.push(
+                t.importSpecifier(
+                  t.identifier(placeholder),
+                  t.identifier(specifier.imported.name)
+                )
               )
+              return acc
             } else if (t.isImportNamespaceSpecifier(specifier)) {
               // An "import namespace specifier" could be for example: "import * as x"
               // This needs to be transformed into "import * as _iga1"
-              return t.importNamespaceSpecifier(t.identifier(placeholder))
+              acc.push(t.importNamespaceSpecifier(t.identifier(placeholder)))
+              return acc
             } else {
               // At the time of writing, these three are the only import specifiers that can be used
               // If something else is here, it's either a huge bug, or a new addition to es6 imports
@@ -100,16 +147,31 @@ module.exports = function importGlobArrayPlugin(babel) {
             t.variableDeclaration('const', [
               t.variableDeclarator(
                 t.identifier(k),
-                t.arrayExpression(
-                  namePlaceholderMap[k].map(i => t.stringLiteral(i))
-                )
+                t.arrayExpression(namePlaceholderMap[k])
+              )
+            ])
+          )
+        }
+
+        // And then we do the same for any of the special-treatment _importMeta statements
+        const importMetaRemappings = []
+        for (let k in importMetaMap) {
+          importMetaRemappings.push(
+            t.variableDeclaration('const', [
+              t.variableDeclarator(
+                t.identifier(k),
+                t.arrayExpression(importMetaMap[k])
               )
             ])
           )
         }
 
         // and now we replace the original code with our new code!
-        _path.replaceWithMultiple([...importStatements, ...varRemappings])
+        _path.replaceWithMultiple([
+          ...importStatements,
+          ...varRemappings,
+          ...importMetaRemappings
+        ])
       }
     }
   }
