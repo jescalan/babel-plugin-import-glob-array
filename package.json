@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-import-glob-array",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Transform a directory import to individual imports represented as an array",
   "main": "index.js",
   "scripts": {
