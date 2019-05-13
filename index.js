@@ -31,7 +31,9 @@ module.exports = function importGlobArrayPlugin(babel) {
         )
 
         // format them so they are relative to the current file
-        const filesRelative = files.map(file => `.${file.replace(baseDir, '')}`)
+        const filesRelative = files.map(file =>
+          path.resolve(currentFilePath, file)
+        )
 
         // First we go through the right side of the import and expand the single wildcard to multiple
         // individual imports. In the process, we assign a placeholder variable name to each import.
@@ -75,7 +77,7 @@ module.exports = function importGlobArrayPlugin(babel) {
                   ),
                   t.objectProperty(
                     t.identifier('importedPath'),
-                    t.stringLiteral(filePath)
+                    t.stringLiteral(filePath.replace(baseDir, ''))
                   )
                 ])
               )
