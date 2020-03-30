@@ -1,6 +1,6 @@
 # Babel Plugin Import Glob Array
 
-A small, simple babel plugin that will convert any import path containing a glob pattern as an array of each of the fles that match the pattern. It can also import only specific exports from each file, which is useful for a set of files with multiple exports that you need to tree shake.
+A small, simple babel plugin that will convert any import path containing a glob pattern as an array of each of the files that match the pattern. It can also import only specific exports from each file, which is useful for a set of files with multiple exports that you need to tree shake.
 
 This plugin is similar to [babel-plugin-import-glob](https://github.com/novemberborn/babel-plugin-import-glob) and [babel-plugin-wildcard](https://github.com/vihanb/babel-plugin-wildcard/blob/master/src/index.js), but with a couple significant differences: it simply imports into an array and does not attempt to determine imports names based off filenames, and it has the capability to import only specific exports from each imported module.
 
